@@ -2,7 +2,7 @@ import angr
 import sys
 
 def main(argv):
-  path_to_binary = ???
+  path_to_binary = "./binary_exploit_learning/angr_ctf/dist/01_angr_avoid"
   project = angr.Project(path_to_binary)
   initial_state = project.factory.entry_state()
   simulation = project.factory.simgr(initial_state)
@@ -13,8 +13,8 @@ def main(argv):
   # everything you will need to look at is near the beginning of the address 
   # space.
   # (!)
-  print_good_address = ???
-  will_not_succeed_address = ???
+  print_good_address = 0x080485e5
+  will_not_succeed_address = 0x080485f7
   simulation.explore(find=print_good_address, avoid=will_not_succeed_address)
 
   if simulation.found:

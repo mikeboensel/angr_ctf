@@ -7,14 +7,15 @@ import claripy
 import sys
 
 def main(argv):
-  path_to_binary = argv[1]
+  path_to_binary = "./binary_exploit_learning/angr_ctf/dist/03_angr_symbolic_registers"
   project = angr.Project(path_to_binary)
 
   # Sometimes, you want to specify where the program should start. The variable
   # start_address will specify where the symbolic execution engine should begin.
   # Note that we are using blank_state, not entry_state.
   # (!)
-  start_address = ???  # :integer (probably hexadecimal)
+  # TODO: 0x08048959 wouldn't work. I think that I would need to add a return value to the Stack for this address to work. 
+  start_address = 0x08048980  # :integer (probably hexadecimal)
   initial_state = project.factory.blank_state(addr=start_address)
 
   # Create a symbolic bitvector (the datatype Angr uses to inject symbolic
@@ -25,8 +26,14 @@ def main(argv):
   # you need, dissassemble the binary and determine the format parameter passed
   # to scanf.
   # (!)
-  password0_size_in_bits = ???  # :integer
+  password0_size_in_bits = 32  # :integer
   password0 = claripy.BVS('password0', password0_size_in_bits)
+
+  password1_size_in_bits = 32  # :integer
+  password1 = claripy.BVS('password1', password1_size_in_bits)
+
+  password2_size_in_bits = 32  # :integer
+  password2 = claripy.BVS('password2', password2_size_in_bits)
   ...
 
   # Set a register to a symbolic value. This is one way to inject symbols into
@@ -41,18 +48,21 @@ def main(argv):
   # to inject which symbol, dissassemble the binary and look at the instructions
   # immediately following the call to scanf.
   # (!)
-  initial_state.regs.??? = password0
+  initial_state.regs.eax = password0
+  initial_state.regs.ebx = password1
+  initial_state.regs.edx = password2
+
   ...
 
   simulation = project.factory.simgr(initial_state)
 
   def is_successful(state):
     stdout_output = state.posix.dumps(sys.stdout.fileno())
-    return ???
+    return b'Good' in stdout_output
 
   def should_abort(state):
     stdout_output = state.posix.dumps(sys.stdout.fileno())
-    return ???
+    return b'Try' in stdout_output
 
   simulation.explore(find=is_successful, avoid=should_abort)
 
@@ -64,13 +74,16 @@ def main(argv):
     # solution. Pass eval the bitvector you want to solve for.
     # (!)
     solution0 = solution_state.se.eval(password0)
+    solution1 = solution_state.se.eval(password1)
+    solution2 = solution_state.se.eval(password2)
+
     ...
 
     # Aggregate and format the solutions you computed above, and then print
     # the full string. Pay attention to the order of the integers, and the
     # expected base (decimal, octal, hexadecimal, etc).
-    solution = ???  # :string
-    print(solution)
+    # solution = ???  # :string
+    print("%x %x %x" , (solution0, solution1, solution2))
   else:
     raise Exception('Could not find the solution')
 
