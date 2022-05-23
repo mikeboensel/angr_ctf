@@ -25,7 +25,10 @@ def main(argv):
   path_to_binary = argv[1]
   project = angr.Project(path_to_binary)
 
-  start_address = ???
+  # I'd planned on just skipping all the File I/O and setting the value in memory...
+  start_address = 0x08048922
+  # Their method using File:
+  # start_address = 0x80488bc
   initial_state = project.factory.blank_state(
     addr=start_address,
     add_options = { angr.options.SYMBOL_FILL_UNCONSTRAINED_MEMORY,
@@ -37,8 +40,9 @@ def main(argv):
   # Note: to read from the file, the binary calls
   # 'fread(buffer, sizeof(char), 64, file)'.
   # (!)
-  filename = ???  # :string
-  symbolic_file_size_bytes = ???
+  filename = 'FOQVSBZB.txt'  # :string
+  # WTF. Why isn't this 64???? LOL. Fuckign thing only uses the first 8 bytes...
+  symbolic_file_size_bytes = 8
 
   # Construct a bitvector for the password and then store it in the file's
   # backing memory. For example, imagine a simple file, 'hello.txt':
@@ -71,20 +75,25 @@ def main(argv):
   # beginning from address zero.
   # Set the content parameter to our BVS instance that holds the symbolic data.
   # (!)
-  password_file = angr.storage.SimFile(filename, content=???)
-  
-  # Add the symbolic file we created to the symbolic filesystem.
-  initial_state.fs.insert(filename, password_file)
+
+  # METHOD 1: Can do the File setup (as expected by the exercise)
+
+  # password_file = angr.storage.SimFile(filename, content=password)  
+  # # Add the symbolic file we created to the symbolic filesystem.
+  # initial_state.fs.insert(filename, password_file)
+
+  # METHOD 2:  set memory (like its been read already)
+  initial_state.memory.store(0x804a0a0, password)
 
   simulation = project.factory.simgr(initial_state)
 
   def is_successful(state):
     stdout_output = state.posix.dumps(sys.stdout.fileno())
-    return ???
+    return b'Good' in stdout_output
 
   def should_abort(state):
     stdout_output = state.posix.dumps(sys.stdout.fileno())
-    return ???
+    return b'Try' in stdout_output
 
   simulation.explore(find=is_successful, avoid=should_abort)
 
