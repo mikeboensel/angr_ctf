@@ -83,6 +83,9 @@ def main(argv):
     # check_equals_ function. Determine the address that is being passed as the
     # parameter and load it into a bitvector so that we can constrain it.
     # (!)
+    #TODO: Fuck. The whole way this is done is weird... I get when things flow from trying to find an address
+    # and then once we have, we have the state we want.
+    # This is like, get to the address, then add a constraint after... How the fuck does that work?
     constrained_parameter_address = password_address
     constrained_parameter_size_bytes = 16
     #TODO: I hate this notation. Can't I just use the BVS named `password`?

@@ -15,3 +15,8 @@ Build binaries in obj/{foo,bar}/angr
 
 Build binaries in upper-level MetaCTF repo ../www/static/obj/{foo,bar}/angr
   make USERS='foo bar' web
+
+
+#TODO:
+- How are Position Independent binaries handled???
+- 
