@@ -32,3 +32,43 @@
 # can take a long time with Angr, so you should replace it with a SimProcedure.
 # angr.SIM_PROCEDURES['glibc']['__libc_start_main']
 # Note 'glibc' instead of 'libc'.
+
+import sys
+import angr
+
+def main(argv):
+    proj = angr.Project(argv[1])
+    # TODO: What is supposed to be used? blank_state or entry_state (w/ suitable address)?
+    # proj.factory.blank_state(add
+
+    # Different scenarios:
+    # 1. entry_state (default entry point) + glibc_start replacement => WORKS (20 seconds)
+    # 2. entry_state (default entry point) by itself => Fan spin (let run for 1min)
+    # 3. main defined entry point + glibc_start replacement => WORKS (19 seconds)
+    # 4. main defined entry point by itself => WORKS (19 sec)
+
+    # TODO: LOL. They used entry_state in the solution... after explicitly saying not to before. 
+    # init_state = proj.factory.entry_state()
+    # Skipping into main(). Does this mean we don't have to worry about __libc_start_main anymore?
+    init_state = proj.factory.entry_state(addr=0x080489e7)
+
+    # Using SimProcedure hooking based on address (probably could have used Symbol name as well since non-stripped)
+    proj.hook(0x0804fab0, angr.SIM_PROCEDURES['libc']['printf']())
+    proj.hook(0x804fb10, angr.SIM_PROCEDURES['libc']['scanf']())
+    proj.hook(0x80503f0, angr.SIM_PROCEDURES['libc']['puts']())
+    #TODO: They explicitly said not to use entry_state, which I would think means we don't need this...
+    # proj.hook(0x8048d60, angr.SIM_PROCEDURES['glibc']['__libc_start_main']())
+
+    sim = proj.factory.simgr(init_state)
+
+    sim.explore(find=0x08048ac5, avoid=0x08048ab3)
+
+    if sim.found:
+        found_state = sim.found[0]
+        print(found_state.posix.dumps(0))
+    else:
+        raise Exception("Nope")
+
+
+if __name__ == '__main__':
+  main(sys.argv)
