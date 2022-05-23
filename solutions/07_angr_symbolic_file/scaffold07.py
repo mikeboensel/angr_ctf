@@ -42,6 +42,7 @@ def main(argv):
   # (!)
   filename = 'FOQVSBZB.txt'  # :string
   # WTF. Why isn't this 64???? LOL. Fuckign thing only uses the first 8 bytes...
+  # Answers show 8, but 64 would work too. 
   symbolic_file_size_bytes = 8
 
   # Construct a bitvector for the password and then store it in the file's
